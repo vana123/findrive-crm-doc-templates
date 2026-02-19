@@ -1,4 +1,13 @@
 /**
+ * Payment item for the contract schedule (subset of deal Payment).
+ */
+export type ContractPayment = {
+  due_date: string;
+  amount: string;
+  status: string;
+};
+
+/**
  * Data passed to the contract-deal PDF template via props.
  */
 export type ContractDealTemplateProps = {
@@ -10,4 +19,5 @@ export type ContractDealTemplateProps = {
   vehicleYear: number;
   carNumber: string;
   contractDate?: string;
+  payments?: ContractPayment[];
 };
