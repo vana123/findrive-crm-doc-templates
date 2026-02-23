@@ -5,9 +5,12 @@ import {
   Page,
   View,
   Text,
+  Image,
   StyleSheet,
   Font,
 } from "@react-pdf/renderer";
+
+import findriveLogo from "../img/findrivelogo.jpg";
 
 const NOTO_SANS_CYRILLIC_URL =
   "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@5.0.3/files/noto-sans-cyrillic-400-normal.woff";
@@ -22,6 +25,15 @@ const styles = StyleSheet.create({
     padding: 40,
     fontSize: 11,
     fontFamily: "NotoSans",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  logo: {
+    height: 48,
+    objectFit: "contain",
   },
   title: {
     fontSize: 16,
@@ -116,6 +128,9 @@ export function InvoiceTemplate({
   return (
     <Document>
       <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <Image style={styles.logo} src={findriveLogo.src} />
+        </View>
         <Text style={styles.title}>Рахунок-фактура № {invoice_number}</Text>
         <View style={styles.section}>
           <Text style={styles.label}>Тип</Text>
