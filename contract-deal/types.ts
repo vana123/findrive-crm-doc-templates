@@ -5,6 +5,9 @@ export type ContractPayment = {
   due_date: string;
   amount: string;
   status: string;
+  purpose?: string | null;
+  net_amount?: string | null;
+  vat_amount?: string | null;
 };
 
 /**

@@ -7,29 +7,20 @@ import {
   Text,
   Image,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 
 import findriveLogo from "../img/findrivelogo.jpg";
-
-const NOTO_SANS_CYRILLIC_URL =
-  "https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@5.0.3/files/noto-sans-cyrillic-400-normal.woff";
-
-Font.register({
-  family: "NotoSans",
-  src: NOTO_SANS_CYRILLIC_URL,
-});
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 11,
-    fontFamily: "NotoSans",
+    fontFamily: "Helvetica",
   },
   header: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   logo: {
     height: 48,
@@ -37,32 +28,45 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 14,
     textAlign: "center",
+    fontWeight: "bold",
   },
-  section: {
+  metaRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
     marginBottom: 12,
+    fontSize: 10,
   },
-  label: {
-    marginBottom: 2,
-    fontSize: 9,
-    color: "#6b7280",
-  },
-  value: {
-    fontSize: 11,
-    lineHeight: 1.35,
-  },
+  metaItem: {},
+  metaLabel: { fontSize: 9, color: "#6b7280", marginBottom: 1 },
+  metaValue: {},
   twoCol: {
     flexDirection: "row",
-    gap: 40,
-    marginBottom: 16,
+    gap: 24,
+    marginBottom: 14,
   },
   col: {
     flex: 1,
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 4,
+    padding: 10,
+    backgroundColor: "#fafafa",
+  },
+  colLabel: {
+    fontSize: 10,
+    fontWeight: "bold",
+    marginBottom: 6,
+  },
+  value: {
+    fontSize: 10,
+    lineHeight: 1.4,
   },
   tableSection: {
-    marginTop: 16,
-    marginBottom: 14,
+    marginTop: 12,
+    marginBottom: 12,
   },
   tableTitle: {
     fontSize: 11,
@@ -73,7 +77,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomWidth: 1,
     borderBottomColor: "#e5e7eb",
-    minHeight: 22,
+    minHeight: 20,
     alignItems: "center",
   },
   tableHeaderRow: {
@@ -81,27 +85,66 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#374151",
     backgroundColor: "#f3f4f6",
-    minHeight: 24,
+    minHeight: 22,
     alignItems: "center",
   },
-  cellNum: { width: 28, padding: 4, fontSize: 9, textAlign: "center" },
-  cellName: { flex: 2, padding: 4, fontSize: 9 },
-  cellQty: { width: 48, padding: 4, fontSize: 9, textAlign: "right" },
-  cellPrice: { width: 56, padding: 4, fontSize: 9, textAlign: "right" },
-  cellAmount: { width: 64, padding: 4, fontSize: 9, textAlign: "right" },
-  cellVat: { width: 40, padding: 4, fontSize: 9, textAlign: "right" },
-  headerCell: { fontWeight: "bold", fontSize: 9 },
-  totalsRow: {
+  cellNum: { width: 24, padding: 4, fontSize: 8, textAlign: "center" },
+  cellName: { flex: 2, padding: 4, fontSize: 8, minWidth: 80 },
+  cellQty: { width: 36, padding: 4, fontSize: 8, textAlign: "right" },
+  cellPrice: { width: 48, padding: 4, fontSize: 8, textAlign: "right" },
+  cellAmount: { width: 52, padding: 4, fontSize: 8, textAlign: "right" },
+  cellVat: { width: 32, padding: 4, fontSize: 8, textAlign: "right" },
+  headerCell: { fontWeight: "bold", fontSize: 8 },
+  razemRow: {
     flexDirection: "row",
-    marginTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#374151",
-    paddingTop: 8,
-    justifyContent: "flex-end",
-    gap: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#374151",
+    minHeight: 22,
+    alignItems: "center",
+    backgroundColor: "#f9fafb",
   },
-  totalsLabel: { fontSize: 10, fontWeight: "bold" },
-  totalsValue: { fontSize: 10 },
+  razemLabel: {
+    flex: 2,
+    padding: 4,
+    fontSize: 9,
+    fontWeight: "bold",
+  },
+  totalsBox: {
+    marginTop: 8,
+    alignSelf: "flex-end",
+    borderWidth: 1,
+    borderColor: "#374151",
+    padding: 8,
+    minWidth: 160,
+  },
+  totalsBoxRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 2,
+    fontSize: 9,
+  },
+  totalsBoxLabel: { fontWeight: "bold" },
+  paymentBlock: {
+    marginTop: 14,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+    fontSize: 10,
+  },
+  paymentRow: {
+    flexDirection: "row",
+    marginBottom: 4,
+  },
+  paymentLabel: { width: 120 },
+  paymentValue: { flex: 1, fontWeight: "bold" },
+  issuerBlock: {
+    marginTop: 16,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#e5e7eb",
+  },
+  issuerLabel: { fontSize: 9, color: "#6b7280", marginBottom: 2 },
+  issuerName: { fontSize: 11, fontWeight: "bold" },
 });
 
 const INVOICE_TYPE_LABELS: Record<string, string> = {
@@ -122,6 +165,16 @@ export function InvoiceTemplate({
   total_net,
   total_tax,
   total_gross,
+  issue_place,
+  sale_date,
+  contract_number,
+  contract_date,
+  payment_deadline,
+  amount_in_words,
+  payment_method,
+  bank_name,
+  bank_account,
+  issuer_name,
 }: Props) {
   const typeLabel = INVOICE_TYPE_LABELS[type] ?? type;
 
@@ -131,28 +184,54 @@ export function InvoiceTemplate({
         <View style={styles.header}>
           <Image style={styles.logo} src={findriveLogo.src} />
         </View>
-        <Text style={styles.title}>Рахунок-фактура № {invoice_number}</Text>
-        <View style={styles.section}>
-          <Text style={styles.label}>Тип</Text>
-          <Text style={styles.value}>{typeLabel}</Text>
-        </View>
-        <View style={styles.section}>
-          <Text style={styles.label}>Дата</Text>
-          <Text style={styles.value}>{issue_date}</Text>
-        </View>
+        <Text style={styles.title}>Rachunek-faktura nr {invoice_number}</Text>
+        <Text style={{ fontSize: 10, marginBottom: 10, textAlign: "center" }}>
+          {typeLabel}
+        </Text>
+
+        {(issue_date || sale_date || issue_place) ? (
+          <View style={styles.metaRow}>
+            {issue_date ? (
+              <View style={styles.metaItem}>
+                <Text style={styles.metaLabel}>Data wydania</Text>
+                <Text style={styles.metaValue}>{issue_date}</Text>
+              </View>
+            ) : null}
+            {sale_date ? (
+              <View style={styles.metaItem}>
+                <Text style={styles.metaLabel}>Data sprzedaży</Text>
+                <Text style={styles.metaValue}>{sale_date}</Text>
+              </View>
+            ) : null}
+            {issue_place ? (
+              <View style={styles.metaItem}>
+                <Text style={styles.metaLabel}>Miejsce wydania</Text>
+                <Text style={styles.metaValue}>{issue_place}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
+        {contract_number && contract_date ? (
+          <View style={{ marginBottom: 10 }}>
+            <Text style={{ fontSize: 10 }}>
+              Dotyczy umowy leasingu nr {contract_number} z dnia {contract_date}
+            </Text>
+          </View>
+        ) : null}
 
         <View style={styles.twoCol}>
           <View style={styles.col}>
-            <Text style={styles.label}>Продавець</Text>
+            <Text style={styles.colLabel}>Sprzedawca:</Text>
             <Text style={styles.value}>{seller.name}</Text>
             <Text style={styles.value}>{seller.address}</Text>
-            <Text style={styles.value}>NIP: {seller.nip}</Text>
+            <Text style={styles.value}>NIP {seller.nip}</Text>
           </View>
           <View style={styles.col}>
-            <Text style={styles.label}>Покупець</Text>
+            <Text style={styles.colLabel}>Nabywca:</Text>
             <Text style={styles.value}>{buyer.name}</Text>
             {buyer.passport ? (
-              <Text style={styles.value}>Паспорт: {buyer.passport}</Text>
+              <Text style={styles.value}>{buyer.passport}</Text>
             ) : null}
             {buyer.pesel ? (
               <Text style={styles.value}>PESEL: {buyer.pesel}</Text>
@@ -161,31 +240,30 @@ export function InvoiceTemplate({
         </View>
 
         <View style={styles.tableSection}>
-          <Text style={styles.tableTitle}>Позиції рахунку</Text>
           <View style={styles.tableHeaderRow}>
             <View style={[styles.cellNum, styles.headerCell]}>
-              <Text>№</Text>
+              <Text>LP</Text>
             </View>
             <View style={[styles.cellName, styles.headerCell]}>
-              <Text>Назва продукту/послуги</Text>
+              <Text>Nazwa towaru / usługi</Text>
             </View>
             <View style={[styles.cellQty, styles.headerCell]}>
-              <Text>Кількість</Text>
+              <Text>Ilość</Text>
             </View>
             <View style={[styles.cellPrice, styles.headerCell]}>
-              <Text>Ціна нетто</Text>
+              <Text>Cena netto</Text>
             </View>
             <View style={[styles.cellAmount, styles.headerCell]}>
-              <Text>Вартість нетто</Text>
+              <Text>Wartość netto</Text>
             </View>
             <View style={[styles.cellVat, styles.headerCell]}>
-              <Text>ПДВ %</Text>
+              <Text>VAT %</Text>
             </View>
             <View style={[styles.cellAmount, styles.headerCell]}>
-              <Text>Сума ПДВ</Text>
+              <Text>Kwota podatku</Text>
             </View>
             <View style={[styles.cellAmount, styles.headerCell]}>
-              <Text>Вартість брутто</Text>
+              <Text>Wartość brutto</Text>
             </View>
           </View>
           {line_items.map((row, idx) => (
@@ -216,20 +294,85 @@ export function InvoiceTemplate({
               </View>
             </View>
           ))}
+          <View style={styles.razemRow}>
+            <View style={styles.razemLabel}>
+              <Text>Razem</Text>
+            </View>
+            <View style={styles.cellQty} />
+            <View style={styles.cellPrice} />
+            <View style={styles.cellAmount}>
+              <Text>{total_net}</Text>
+            </View>
+            <View style={styles.cellVat}>
+              <Text>X</Text>
+            </View>
+            <View style={styles.cellAmount}>
+              <Text>{total_tax}</Text>
+            </View>
+            <View style={styles.cellAmount}>
+              <Text>{total_gross}</Text>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.totalsRow}>
-          <Text style={styles.totalsLabel}>Всього нетто:</Text>
-          <Text style={styles.totalsValue}>{total_net}</Text>
+        <View style={styles.totalsBox}>
+          <View style={styles.totalsBoxRow}>
+            <Text style={styles.totalsBoxLabel}>Wartość netto</Text>
+            <Text>{total_net}</Text>
+          </View>
+          <View style={styles.totalsBoxRow}>
+            <Text style={styles.totalsBoxLabel}>Wartość VAT</Text>
+            <Text>{total_tax}</Text>
+          </View>
+          <View style={styles.totalsBoxRow}>
+            <Text style={styles.totalsBoxLabel}>Wartość brutto</Text>
+            <Text>{total_gross}</Text>
+          </View>
         </View>
-        <View style={styles.totalsRow}>
-          <Text style={styles.totalsLabel}>ПДВ:</Text>
-          <Text style={styles.totalsValue}>{total_tax}</Text>
+
+        <View style={styles.paymentBlock}>
+          <View style={styles.paymentRow}>
+            <Text style={styles.paymentLabel}>Do zapłaty:</Text>
+            <Text style={styles.paymentValue}>{total_gross} PLN</Text>
+          </View>
+          {amount_in_words ? (
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>Słownie:</Text>
+              <Text style={styles.paymentValue}>{amount_in_words}</Text>
+            </View>
+          ) : null}
+          {payment_deadline ? (
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>Termin płatności:</Text>
+              <Text style={styles.paymentValue}>{payment_deadline}</Text>
+            </View>
+          ) : null}
+          {payment_method ? (
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>Płatność:</Text>
+              <Text style={styles.paymentValue}>{payment_method}</Text>
+            </View>
+          ) : null}
+          {bank_name ? (
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>Bank:</Text>
+              <Text style={styles.paymentValue}>{bank_name}</Text>
+            </View>
+          ) : null}
+          {bank_account ? (
+            <View style={styles.paymentRow}>
+              <Text style={styles.paymentLabel}>Konto:</Text>
+              <Text style={styles.paymentValue}>{bank_account}</Text>
+            </View>
+          ) : null}
         </View>
-        <View style={styles.totalsRow}>
-          <Text style={styles.totalsLabel}>Всього брутто:</Text>
-          <Text style={styles.totalsValue}>{total_gross}</Text>
-        </View>
+
+        {issuer_name ? (
+          <View style={styles.issuerBlock}>
+            <Text style={styles.issuerLabel}>Imię i nazwisko wystawcy</Text>
+            <Text style={styles.issuerName}>{issuer_name}</Text>
+          </View>
+        ) : null}
       </Page>
     </Document>
   );

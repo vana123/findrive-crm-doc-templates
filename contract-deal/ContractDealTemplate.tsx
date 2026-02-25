@@ -78,12 +78,30 @@ const styles = StyleSheet.create({
     width: 28,
     justifyContent: "center",
   },
+  tableCellDate: {
+    padding: 4,
+    paddingTop: 5,
+    paddingBottom: 5,
+    fontSize: 9,
+    width: 56,
+    justifyContent: "center",
+  },
+  tableCellPurpose: {
+    padding: 4,
+    paddingTop: 5,
+    paddingBottom: 5,
+    fontSize: 9,
+    flex: 1,
+    minWidth: 50,
+    maxWidth: 100,
+    justifyContent: "center",
+  },
   tableCellAmount: {
     padding: 4,
     paddingTop: 5,
     paddingBottom: 5,
     fontSize: 9,
-    width: 72,
+    width: 52,
     textAlign: "right",
     justifyContent: "center",
   },
@@ -105,13 +123,33 @@ const styles = StyleSheet.create({
     width: 28,
     justifyContent: "center",
   },
+  tableHeaderCellDate: {
+    padding: 4,
+    paddingTop: 5,
+    paddingBottom: 5,
+    fontSize: 9,
+    fontWeight: "bold",
+    width: 56,
+    justifyContent: "center",
+  },
+  tableHeaderCellPurpose: {
+    padding: 4,
+    paddingTop: 5,
+    paddingBottom: 5,
+    fontSize: 9,
+    fontWeight: "bold",
+    flex: 1,
+    minWidth: 50,
+    maxWidth: 100,
+    justifyContent: "center",
+  },
   tableHeaderCellAmount: {
     padding: 4,
     paddingTop: 5,
     paddingBottom: 5,
     fontSize: 9,
     fontWeight: "bold",
-    width: 72,
+    width: 52,
     textAlign: "right",
     justifyContent: "center",
   },
@@ -128,13 +166,20 @@ function formatScheduleDate(iso: string): string {
   });
 }
 
-function formatScheduleAmount(amount: string): string {
-  const n = parseFloat(amount);
-  if (Number.isNaN(n)) return amount;
+function formatMoney(value: number): string {
+  if (!Number.isFinite(value)) return "—";
   return new Intl.NumberFormat("uk-UA", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(n);
+  }).format(value);
+}
+
+function getPaymentGross(p: ContractPayment): number {
+  const net = p.net_amount != null ? parseFloat(p.net_amount) : NaN;
+  const vat = p.vat_amount != null ? parseFloat(p.vat_amount) : NaN;
+  if (!Number.isNaN(net) && !Number.isNaN(vat)) return net + vat;
+  const gross = parseFloat(p.amount);
+  return Number.isNaN(gross) ? 0 : gross;
 }
 
 function sortPayments(payments: ContractPayment[]): ContractPayment[] {
@@ -210,26 +255,49 @@ export function ContractDealTemplate({
               <View style={styles.tableHeaderCellNum}>
                 <Text>№</Text>
               </View>
-              <View style={styles.tableHeaderCell}>
-                <Text>Дата платежу</Text>
+              <View style={styles.tableHeaderCellDate}>
+                <Text>Термін платежу</Text>
+              </View>
+              <View style={styles.tableHeaderCellPurpose}>
+                <Text>Ціль платежу</Text>
               </View>
               <View style={styles.tableHeaderCellAmount}>
-                <Text>Сума</Text>
+                <Text>Рата нетто</Text>
+              </View>
+              <View style={styles.tableHeaderCellAmount}>
+                <Text>VAT</Text>
+              </View>
+              <View style={styles.tableHeaderCellAmount}>
+                <Text>Всього</Text>
               </View>
             </View>
-            {sortedPayments.map((p, index) => (
-              <View key={index} style={styles.tableRow}>
-                <View style={styles.tableCellNum}>
-                  <Text>{index + 1}</Text>
+            {sortedPayments.map((p, index) => {
+              const net = p.net_amount != null ? parseFloat(p.net_amount) : NaN;
+              const vat = p.vat_amount != null ? parseFloat(p.vat_amount) : NaN;
+              const gross = getPaymentGross(p);
+              return (
+                <View key={index} style={styles.tableRow}>
+                  <View style={styles.tableCellNum}>
+                    <Text>{index + 1}</Text>
+                  </View>
+                  <View style={styles.tableCellDate}>
+                    <Text>{formatScheduleDate(p.due_date)}</Text>
+                  </View>
+                  <View style={styles.tableCellPurpose}>
+                    <Text>{p.purpose ?? ""}</Text>
+                  </View>
+                  <View style={styles.tableCellAmount}>
+                    <Text>{Number.isNaN(net) ? "—" : formatMoney(net)}</Text>
+                  </View>
+                  <View style={styles.tableCellAmount}>
+                    <Text>{Number.isNaN(vat) ? "—" : formatMoney(vat)}</Text>
+                  </View>
+                  <View style={styles.tableCellAmount}>
+                    <Text>{formatMoney(gross)}</Text>
+                  </View>
                 </View>
-                <View style={styles.tableCell}>
-                  <Text>{formatScheduleDate(p.due_date)}</Text>
-                </View>
-                <View style={styles.tableCellAmount}>
-                  <Text>{formatScheduleAmount(p.amount)}</Text>
-                </View>
-              </View>
-            ))}
+              );
+            })}
           </View>
         ) : null}
       </Page>

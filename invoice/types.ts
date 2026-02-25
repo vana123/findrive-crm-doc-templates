@@ -40,8 +40,27 @@ export type InvoiceTemplateProps = {
   seller: InvoiceSeller;
   buyer: InvoiceBuyer;
   line_items: InvoiceLineItemTemplate[];
-  /** Totals (can be computed from line_items or passed explicitly). */
   total_net: string;
   total_tax: string;
   total_gross: string;
+  /** Місце видачі */
+  issue_place?: string | null;
+  /** Дата продажу (для оренди — дата останньої рати) */
+  sale_date?: string | null;
+  /** Номер договору для тексту "Dotyczy umowy leasingu nr X z dnia Y" */
+  contract_number?: string | null;
+  /** Дата договору */
+  contract_date?: string | null;
+  /** Термін платіжу (наприклад дата останньої рати) */
+  payment_deadline?: string | null;
+  /** Сума прописом */
+  amount_in_words?: string | null;
+  /** Спосіб оплати (наприклад "Przelew") */
+  payment_method?: string | null;
+  /** Банк */
+  bank_name?: string | null;
+  /** Номер рахунку */
+  bank_account?: string | null;
+  /** Ім'я та прізвище виставника */
+  issuer_name?: string | null;
 };
