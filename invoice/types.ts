@@ -8,12 +8,20 @@ export type InvoiceSeller = {
 };
 
 /**
- * Buyer (Покупець) data for invoice template — physical person.
+ * Buyer (Покупець) data for invoice template.
+ * buyer_type: 'individual' (FO) | 'jdg' | 'company' (Sp. z o.o.)
  */
 export type InvoiceBuyer = {
   name: string;
+  buyer_type?: string | null;
   passport?: string | null;
+  passport_issue_date?: string | null;
   pesel?: string | null;
+  nip?: string | null;
+  address?: string | null;
+  postal_code?: string | null;
+  phone?: string | null;
+  email?: string | null;
 };
 
 /**
@@ -43,6 +51,8 @@ export type InvoiceTemplateProps = {
   total_net: string;
   total_tax: string;
   total_gross: string;
+  /** Сума "Do zapłaty" з пробілами-розділювачами тисяч (наприклад "10 000,00") */
+  total_gross_display?: string;
   /** Місце видачі */
   issue_place?: string | null;
   /** Дата продажу (для оренди — дата останньої рати) */
