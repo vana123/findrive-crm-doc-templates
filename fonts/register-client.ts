@@ -8,6 +8,7 @@ let registered = false;
  * Uses /public/fonts/ URLs.
  */
 export function registerFontsClient() {
+  if (typeof window === "undefined") return; // Skip on server — server uses absolute paths
   if (registered) return;
   registered = true;
 

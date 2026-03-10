@@ -3,16 +3,12 @@ import { Font } from "@react-pdf/renderer";
 
 const FONTS_DIR = path.join(process.cwd(), "doc-templates", "fonts");
 
-let registered = false;
-
 /**
  * Register Times New Roman font family (with latin-ext / Polish support)
- * for @react-pdf/renderer. Safe to call multiple times.
+ * for @react-pdf/renderer. Safe to call multiple times — always re-registers
+ * with absolute paths to ensure server-side rendering works correctly.
  */
 export function registerFonts() {
-  if (registered) return;
-  registered = true;
-
   Font.register({
     family: "TimesNewRoman",
     fonts: [
