@@ -44,7 +44,7 @@ export type InvoiceLineItemTemplate = {
 export type InvoiceTemplateProps = {
   invoice_number: string;
   issue_date: string;
-  type: "advance" | "deposit" | "rental";
+  type: "advance" | "deposit" | "rental" | "administrative";
   seller: InvoiceSeller;
   buyer: InvoiceBuyer;
   line_items: InvoiceLineItemTemplate[];
