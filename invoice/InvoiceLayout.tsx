@@ -35,6 +35,11 @@ const s = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 2,
   },
+  contractLine: {
+    fontSize: 10,
+    fontStyle: "italic",
+    marginBottom: 12,
+  },
   metaLine: { fontSize: 9, marginBottom: 1 },
 
   /* ── Parties ── */
@@ -61,13 +66,21 @@ const s = StyleSheet.create({
   row: { flexDirection: "row" },
   /* header cell */
   hCell: {
-    borderWidth: THIN,
-    borderColor: BORDER,
+    borderTopWidth: THIN,
+    borderTopColor: BORDER,
+    borderBottomWidth: THIN,
+    borderBottomColor: BORDER,
+    borderRightWidth: THIN,
+    borderRightColor: BORDER,
     paddingHorizontal: 4,
     paddingVertical: 4,
     fontSize: 8,
     fontWeight: "bold",
     justifyContent: "center",
+  },
+  hCellFirst: {
+    borderLeftWidth: THIN,
+    borderLeftColor: BORDER,
   },
   /* data cell */
   dCell: {
@@ -101,56 +114,32 @@ const s = StyleSheet.create({
     fontSize: 8,
   },
   razemLabelCell: {
-    borderBottomWidth: THIN,
-    borderBottomColor: BORDER,
-    borderRightWidth: THIN,
-    borderRightColor: BORDER,
-    borderLeftWidth: THIN,
-    borderLeftColor: BORDER,
     paddingHorizontal: 4,
     paddingVertical: 4,
     fontSize: 8,
     fontWeight: "bold",
     textAlign: "right",
   },
-
-  /* ── Totals box ── */
-  totalsWrap: { alignItems: "flex-end", marginTop: 2, marginBottom: 8 },
-  totalsBox: { borderWidth: THIN, borderColor: BORDER, width: 190 },
-  tRow: {
-    flexDirection: "row",
-    borderBottomWidth: THIN,
-    borderBottomColor: BORDER,
-  },
-  tRowLast: { flexDirection: "row" },
-  tLabel: {
-    flex: 1,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    fontSize: 9,
-    fontWeight: "bold",
+  /* Right-border-only filler: continues a column divider through otherwise
+     borderless rows without introducing borderLeft on the adjacent cell
+     (mixing borderRight and borderLeft at the same X shifts the line by THIN). */
+  colDivider: {
     borderRightWidth: THIN,
     borderRightColor: BORDER,
   },
-  tVal: {
-    width: 72,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    fontSize: 9,
-    textAlign: "right",
-  },
+  /* Totals rows — label in Kwota podatku column */
+  totalsLabel: { width: 62, textAlign: "right" },
 
   /* ── Payment block ── */
   payBlock: { marginTop: 18, fontSize: 10 },
-  pRow: { flexDirection: "row", marginBottom: 2 },
-  pLabel: { width: 140 },
+  pRow: { flexDirection: "row" },
   pBold: { fontWeight: "bold" },
-  pValue: { flex: 1, fontWeight: "bold" },
+  payLine: { fontWeight: "bold", marginBottom: 1 },
 
   /* ── Issuer ── */
   issuer: { marginTop: 18 },
-  issuerLabel: { fontSize: 9, marginBottom: 2 },
-  issuerName: { fontSize: 10 },
+  issuerLabel: { fontSize: 9, fontWeight: "bold", marginBottom: 2 },
+  issuerName: { fontSize: 10, textTransform: "uppercase" },
 });
 
 type Props = InvoiceTemplateProps & { logoSrc: string };
@@ -188,7 +177,14 @@ export function InvoiceLayout({
           <Image style={s.logo} src={logoSrc} />
           <View style={s.headerRight}>
             <Text style={s.title}>Faktura numer {invoice_number}</Text>
-            <Text style={{ fontSize: 9, marginBottom: 9 }}>{" "}</Text>
+            {(type === "rental" || type === "advance") && contract_number ? (
+              <Text style={s.contractLine}>
+                dotyczy umowy leasingu nr {contract_number}
+                {contract_date ? ` z dnia ${contract_date}` : ""}
+              </Text>
+            ) : (
+              <Text style={{ fontSize: 9, marginBottom: 9 }}>{" "}</Text>
+            )}
             {issue_place ? (
               <Text style={s.metaLine}>
                 Miejsce wystawienia: {issue_place}
@@ -258,7 +254,7 @@ export function InvoiceLayout({
         <View style={s.table}>
           {/* Header */}
           <View style={s.row}>
-            <View style={[s.hCell, s.wLP]}><Text>LP</Text></View>
+            <View style={[s.hCell, s.hCellFirst, s.wLP]}><Text>LP</Text></View>
             <View style={[s.hCell, s.wName]}><Text>Nazwa towaru / usługi</Text></View>
             <View style={[s.hCell, s.wQty]}><Text>Ilość</Text></View>
             <View style={[s.hCell, s.wNetP]}><Text>{"Cena\nnetto"}</Text></View>
@@ -287,7 +283,7 @@ export function InvoiceLayout({
             <View style={[s.razemBlankCell, { width: 22 }]} />
             <View style={[s.razemBlankCell, { flex: 1, minWidth: 130 }]} />
             <View style={[s.razemBlankCell, { width: 36 }]} />
-            <View style={[s.razemLabelCell, s.wNetP]}>
+            <View style={[s.razemLabelCell, s.colDivider, s.wNetP]}>
               <Text>Razem</Text>
             </View>
             <View style={[s.dCell, s.wNetV]}>
@@ -301,61 +297,60 @@ export function InvoiceLayout({
               <Text style={s.pBold}>{total_gross}</Text>
             </View>
           </View>
-        </View>
 
-        {/* ── Totals box ── */}
-        <View style={s.totalsWrap}>
-          <View style={s.totalsBox}>
-            <View style={s.tRow}>
-              <Text style={s.tLabel}>Wartość netto</Text>
-              <Text style={s.tVal}>{total_net}</Text>
+          {/* Totals — continuation rows inside the same table */}
+          {[
+            { label: "Wartość netto", value: total_net },
+            { label: "Wartość VAT", value: total_tax },
+            { label: "Wartość brutto", value: total_gross },
+          ].map((t, i) => (
+            <View key={`total-${i}`} style={s.row}>
+              <View style={[s.razemBlankCell, { width: 22 }]} />
+              <View style={[s.razemBlankCell, { flex: 1, minWidth: 130 }]} />
+              <View style={[s.razemBlankCell, { width: 36 }]} />
+              <View style={[s.razemBlankCell, { width: 58 }]} />
+              <View style={[s.razemBlankCell, { width: 58 }]} />
+              <View style={[s.razemBlankCell, s.colDivider, { width: 34 }]} />
+              <View style={[s.dCell, s.totalsLabel]}>
+                <Text style={s.pBold}>{t.label}</Text>
+              </View>
+              <View style={[s.dCell, s.wGross]}>
+                <Text>{t.value}</Text>
+              </View>
             </View>
-            <View style={s.tRow}>
-              <Text style={s.tLabel}>Wartość VAT</Text>
-              <Text style={s.tVal}>{total_tax}</Text>
-            </View>
-            <View style={s.tRowLast}>
-              <Text style={s.tLabel}>Wartość brutto</Text>
-              <Text style={s.tVal}>{total_gross}</Text>
-            </View>
-          </View>
+          ))}
         </View>
 
         {/* ── Payment block ── */}
         <View style={s.payBlock}>
-          <View style={s.pRow}>
-            <Text style={s.pLabel}>Do zapłaty:</Text>
-            <Text style={s.pValue}>{doZaplaty} PLN</Text>
+          <View style={[s.pRow, { marginBottom: 1 }]}>
+            <Text style={s.pBold}>Do zapłaty:</Text>
+            <Text style={[s.pBold, { marginLeft: 16 }]}>{doZaplaty} PLN</Text>
           </View>
           {amount_in_words ? (
-            <View style={s.pRow}>
-              <Text style={[s.pLabel, s.pBold]}>Słownie:</Text>
-              <Text style={{ flex: 1 }}>{amount_in_words}</Text>
-            </View>
+            <Text style={s.payLine}>
+              <Text style={s.pBold}>Słownie: </Text>{amount_in_words}
+            </Text>
           ) : null}
           {payment_deadline ? (
-            <View style={[s.pRow, { marginTop: 4 }]}>
-              <Text style={[s.pLabel, s.pBold]}>Termin płatności:</Text>
-              <Text style={{ flex: 1 }}>{payment_deadline}</Text>
-            </View>
+            <Text style={s.payLine}>
+              <Text style={s.pBold}>Termin płatności: </Text>{payment_deadline}
+            </Text>
           ) : null}
           {payment_method ? (
-            <View style={s.pRow}>
-              <Text style={[s.pLabel, s.pBold]}>Płatność:</Text>
-              <Text style={{ flex: 1 }}>{payment_method}</Text>
-            </View>
+            <Text style={s.payLine}>
+              <Text style={s.pBold}>Płatność: </Text>{payment_method}
+            </Text>
           ) : null}
           {bank_name ? (
-            <View style={s.pRow}>
-              <Text style={[s.pLabel, s.pBold]}>Bank:</Text>
-              <Text style={{ flex: 1 }}>{bank_name}</Text>
-            </View>
+            <Text style={s.payLine}>
+              <Text style={s.pBold}>Bank: </Text>{bank_name}
+            </Text>
           ) : null}
           {bank_account ? (
-            <View style={s.pRow}>
-              <Text style={[s.pLabel, s.pBold]}>Konto:</Text>
-              <Text style={{ flex: 1 }}>{bank_account}</Text>
-            </View>
+            <Text style={s.payLine}>
+              <Text style={s.pBold}>Konto: </Text>{bank_account}
+            </Text>
           ) : null}
         </View>
 
